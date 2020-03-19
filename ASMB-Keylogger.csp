@@ -1,0 +1,16 @@
+.EQU K_SR, $000
+.EQU K_DR, $001
+.EQU STORAGE, $D00
+LDX# $000
+
+CHECK_KEYIN: INB K_SR ; Checks for keydown
+NOP
+JGE CHECK_KEYIN
+INB K_DR ; Reads the keydown value
+STA+ STORAGE
+ADX# $001
+CMX# $010
+JGE END
+JMP CHECK_KEYIN
+
+END: HLT

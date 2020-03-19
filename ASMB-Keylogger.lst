@@ -1,0 +1,23 @@
+LINE ADDR CONTENTS SOURCE LINE
+  1.              .EQU K_SR, $000
+  2.              .EQU K_DR, $001
+  3.              .EQU STORAGE, $D00
+  4.  000 010000  LDX# $000
+  5.              
+  6.  001 702000  CHECK_KEYIN: INB K_SR
+  7.  002 FFF038  NOP
+  8.  003 4B2001  JGE CHECK_KEYIN
+  9.  004 702001  INB K_DR
+ 10.  005 044D00  STA+ STORAGE
+ 11.  006 110001  ADX# $001
+ 12.  007 210010  CMX# $010
+ 13.  008 4B200A  JGE END
+ 14.  009 402001  JMP CHECK_KEYIN
+ 15.              
+ 16.  00A FFFFFF  END: HLT
+ 17.              
+
+                     SYMBOL TABLE CONTENTS
+
+000001 = CHECK_KEYIN     00000A = END             000001 = K_DR            
+000000 = K_SR            000D00 = STORAGE         
