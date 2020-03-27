@@ -1,16 +1,34 @@
-.EQU K_SR, $000
-.EQU K_DR, $001
-.EQU STORAGE, $D00
-LDX# $000
-
+.EQU K_SR, $000 ; Sets the Keyboard Status Register port
+.EQU K_DR, $001 ; Sets the Keyboard Data Register port
+.EQU STORAGE, $D00 ; Sets the secure memory location start
+.EQU XR_TEMP, $C2A ; Defines a temporary storage location for the XR
+.EQU CHAR_CHK, $CFF ; u know
+.EQU @, $050 ; Goes to $050
+FANCY: .CHAR 'get pwned', STR_LEN ; Defines a string of words with length at $050
+.EQU @, $000 ; Goes to $000
+LDX# $000 ; Unnecessarily clears the XR
+LDF# $CF7 ; Completely necessarily sets the FP to $000
 CHECK_KEYIN: INB K_SR ; Checks for keydown
 NOP
-JGE CHECK_KEYIN
+JGE CHECK_KEYIN ; Returns to waiting for keystroke
 INB K_DR ; Reads the keydown value
-STA+ STORAGE
-ADX# $001
-CMX# $010
-JGE END
-JMP CHECK_KEYIN
+STC STORAGE ; Stores the keydown value as a char
 
+STX XR_TEMP
+LDX# $000
+CHK_LP: CMX# STR_LEN
+JEQ END
+LDC FANCY
+STA CHAR_CHK
+LDC ! XR_TEMP ; This is the problem. Its just adding C2a to cf7
+ADX# $001
+CMA CHAR_CHK
+JEQ CHK_LP
+
+LDX XR_TEMP
+FINLOOP: ADX# $001
+CMX# $030 ; Limits the number of loops to 48
+JGE END ; Jumps to the end if the limit has been reached
+JMP CHECK_KEYIN ; Returns to waiting for keystroke
 END: HLT
+ 

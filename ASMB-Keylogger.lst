@@ -1,23 +1,44 @@
 LINE ADDR CONTENTS SOURCE LINE
-  1.              .EQU K_SR, $000
-  2.              .EQU K_DR, $001
-  3.              .EQU STORAGE, $D00
-  4.  000 010000  LDX# $000
-  5.              
-  6.  001 702000  CHECK_KEYIN: INB K_SR
-  7.  002 FFF038  NOP
-  8.  003 4B2001  JGE CHECK_KEYIN
-  9.  004 702001  INB K_DR
- 10.  005 044D00  STA+ STORAGE
- 11.  006 110001  ADX# $001
- 12.  007 210010  CMX# $010
- 13.  008 4B200A  JGE END
- 14.  009 402001  JMP CHECK_KEYIN
- 15.              
- 16.  00A FFFFFF  END: HLT
- 17.              
+  1.              .EQU K_SR, $000 ; Sets the Keyboard Status Register port
+  2.              .EQU K_DR, $001 ; Sets the Keyboard Data Register port
+  3.              .EQU STORAGE, $D00 ; Sets the secure memory location start
+  4.              .EQU XR_TEMP, $C2A ; Defines a temporary storage location for the XR
+  5.              .EQU CHAR_CHK, $CFF ; u know
+  6.              .EQU @, $050 ; Goes to $050
+  7.  050 676574  FANCY: .CHAR 'get pwned', STR_LEN ; Defines a string of words with length at $050
+      051 207077
+      052 6E6564
+  8.              .EQU @, $000 ; Goes to $000
+  9.  000 010000  LDX# $000 ; Unnecessarily clears the XR
+ 10.  001 030CF7  LDF# $CF7 ; Completely necessarily sets the FP to $000
+ 11.  002 702000  CHECK_KEYIN: INB K_SR ; Checks for keydown
+ 12.  003 FFF038  NOP
+ 13.  004 4B2002  JGE CHECK_KEYIN ; Returns to waiting for keystroke
+ 14.  005 702001  INB K_DR ; Reads the keydown value
+ 15.  006 512D00  STC STORAGE ; Stores the keydown value as a char
+ 16.              
+ 17.  007 052C2A  STX XR_TEMP
+ 18.  008 010000  LDX# $000
+ 19.  009 21000A  CHK_LP: CMX# $00A
+ 20.  00A 482016  JEQ END
+ 21.  00B 502050  LDC FANCY
+ 22.  00C 042CFF  STA CHAR_CHK
+ 23.  00D 503C2A  LDC ! XR_TEMP
+ 24.  00E 110001  ADX# $001
+ 25.  00F 202CFF  CMA CHAR_CHK
+ 26.  010 482009  JEQ CHK_LP
+ 27.              
+ 28.  011 012C2A  LDX XR_TEMP
+ 29.  012 110001  FINLOOP: ADX# $001
+ 30.  013 210030  CMX# $030 ; Limits the number of loops to 48
+ 31.  014 4B2016  JGE END ; Jumps to the end if the limit has been reached
+ 32.  015 402002  JMP CHECK_KEYIN ; Returns to waiting for keystroke
+ 33.  016 FFFFFF  END: HLT
+ 34.               
 
                      SYMBOL TABLE CONTENTS
 
-000001 = CHECK_KEYIN     00000A = END             000001 = K_DR            
-000000 = K_SR            000D00 = STORAGE         
+000CFF = CHAR_CHK        000002 = CHECK_KEYIN     000009 = CHK_LP          
+000016 = END             000050 = FANCY           000012 = FINLOOP         
+000001 = K_DR            000000 = K_SR            000D00 = STORAGE         
+000009 = STR_LEN         000C2A = XR_TEMP         
